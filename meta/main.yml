@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: Michael Contento
+  description:
+  company:
+  license:
+  min_ansible_version: 1.4
+  platforms:
+  categories:
+  - web
+  - system

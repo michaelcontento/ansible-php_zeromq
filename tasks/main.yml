@@ -1,0 +1,36 @@
+---
+- name: Ensure PECl is installed
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+  - libzmq3-dev
+  - php-pear
+  - php5-dev
+  - pkg-config
+
+- name: Check if zmq is already installed
+  command: pecl list | egrep "^zmq\W+"
+  ignore_errors: yes
+  register: zmq_pecl_grep
+
+- name: Install zeromq php binding
+  command: pecl install --ignore-errors zmq-beta
+  when: zmq_pecl_grep|failed
+  notify: restart php-fpm
+
+- name: Create php.ini for zeromq
+  lineinfile:
+    dest: /etc/php5/mods-available/zmq.ini
+    line: extension=zmq.so
+    create: yes
+
+- name: Link zeromq mods
+  file:
+    dest: "/etc/php5/{{ item }}/conf.d/30-zmq.ini"
+    src: /etc/php5/mods-available/zmq.ini
+    state: link
+  ignore_errors: yes
+  with_items:
+  - fpm
+  - cli
